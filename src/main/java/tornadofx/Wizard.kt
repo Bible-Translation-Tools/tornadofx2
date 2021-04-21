@@ -218,21 +218,6 @@ abstract class Wizard @JvmOverloads constructor(title: String? = null, heading: 
             }
             oldPage?.callOnUndock()
         }
-
-        runLater {
-            // For when the instance is created
-            currentStage?.setOnCloseRequest {
-                it.consume()
-                onCancel()
-            }
-            // For when the instance is reused and the stage is changed
-            root.sceneProperty().select { it.windowProperty() }.onChange {
-                it?.setOnCloseRequest {
-                    it.consume()
-                    onCancel()
-                }
-            }
-        }
     }
 
     override fun onDock() {
