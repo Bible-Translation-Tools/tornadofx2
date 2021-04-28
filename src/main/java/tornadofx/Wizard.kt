@@ -200,6 +200,10 @@ abstract class Wizard @JvmOverloads constructor(title: String? = null, heading: 
         completeListeners.add({ resultListener.run() })
     }
 
+    protected fun notifyComplete() {
+        completeListeners.withEach { this() }
+    }
+
     override fun onSave() {
         super.onSave()
         isComplete = true
@@ -222,7 +226,7 @@ abstract class Wizard @JvmOverloads constructor(title: String? = null, heading: 
 
     override fun onDock() {
         complete.onChange {
-            if (it) completeListeners.withEach { this() }
+            if (it) notifyComplete()
         }
 
         // Enter completes current page and goes to next, finishes on last
