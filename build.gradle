@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "no.tornado"
-version = "2.3.1"
+version = "orature-chunk-prototype"
 description = "JavaFX Framework for Kotlin"
 
 repositories {
