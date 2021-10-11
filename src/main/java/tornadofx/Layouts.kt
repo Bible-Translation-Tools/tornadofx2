@@ -15,6 +15,7 @@ import javafx.scene.layout.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 import kotlin.reflect.full.createInstance
+import org.controlsfx.control.HiddenSidesPane
 
 private val GridPaneRowIdKey = "TornadoFX.GridPaneRowId"
 private val GridPaneParentObjectKey = "TornadoFX.GridPaneParentObject"
@@ -163,6 +164,7 @@ fun EventTarget.pane(op: Pane.() -> Unit = {}) = opcr(this, Pane(), op)
 fun EventTarget.flowpane(op: FlowPane.() -> Unit = {}) = opcr(this, FlowPane(), op)
 fun EventTarget.tilepane(op: TilePane.() -> Unit = {}) = opcr(this, TilePane(), op)
 fun EventTarget.borderpane(op: BorderPane.() -> Unit = {}) = opcr(this, BorderPane(), op)
+fun EventTarget.hiddensidespane(op: HiddenSidesPane.() -> Unit = {}) = opcr(this, HiddenSidesPane(), op)
 
 @Suppress("UNCHECKED_CAST")
 var Node.builderTarget: KFunction1<*, ObjectProperty<Node>>?
@@ -218,6 +220,55 @@ fun <T : Node> BorderPane.right(rightNode: T, op: T.() -> Unit = {}): T {
 fun <T : Node> BorderPane.center(centerNode: T, op: T.() -> Unit = {}): T {
     center = centerNode
     return opcr(this, centerNode, op)
+}
+
+fun HiddenSidesPane.top(op: HiddenSidesPane.() -> Unit) = region(HiddenSidesPane::topProperty, op)
+fun HiddenSidesPane.bottom(op: HiddenSidesPane.() -> Unit) = region(HiddenSidesPane::bottomProperty, op)
+fun HiddenSidesPane.left(op: HiddenSidesPane.() -> Unit) = region(HiddenSidesPane::leftProperty, op)
+fun HiddenSidesPane.right(op: HiddenSidesPane.() -> Unit) = region(HiddenSidesPane::rightProperty, op)
+fun HiddenSidesPane.content(op: HiddenSidesPane.() -> Unit) = region(HiddenSidesPane::contentProperty, op)
+internal fun HiddenSidesPane.region(region: KFunction1<HiddenSidesPane, ObjectProperty<Node>>?, op: HiddenSidesPane.() -> Unit) {
+    builderTarget = region
+    op()
+    builderTarget = null
+}
+
+@Deprecated("Use top = node {} instead")
+fun <T : Node> HiddenSidesPane.top(topNode: T, op: T.() -> Unit = {}): T {
+    top = topNode
+    return opcr(this, topNode, op)
+}
+
+inline fun <reified C : UIComponent> HiddenSidesPane.setRegion(scope: Scope, region: KFunction1<HiddenSidesPane, ObjectProperty<Node>>) = apply {
+    region.invoke(this).value = find<C>(scope).root
+}
+
+fun <C : UIComponent> HiddenSidesPane.setRegion(scope: Scope, region: KFunction1<HiddenSidesPane, ObjectProperty<Node>>, nodeType: KClass<C>) = apply {
+    region.invoke(this).value = find(nodeType, scope).root
+}
+
+@Deprecated("Use bottom = node {} instead")
+fun <T : Node> HiddenSidesPane.bottom(bottomNode: T, op: T.() -> Unit = {}): T {
+    bottom = bottomNode
+    return opcr(this, bottomNode, op)
+}
+
+@Deprecated("Use left = node {} instead")
+fun <T : Node> HiddenSidesPane.left(leftNode: T, op: T.() -> Unit = {}): T {
+    left = leftNode
+    return opcr(this, leftNode, op)
+}
+
+@Deprecated("Use right = node {} instead")
+fun <T : Node> HiddenSidesPane.right(rightNode: T, op: T.() -> Unit = {}): T {
+    right = rightNode
+    return opcr(this, rightNode, op)
+}
+
+@Deprecated("Use content = node {} instead")
+fun <T : Node> HiddenSidesPane.content(contentNode: T, op: T.() -> Unit = {}): T {
+    content = contentNode
+    return opcr(this, contentNode, op)
 }
 
 fun EventTarget.titledpane(title: String? = null, node: Node? = null, collapsible: Boolean = true, op: (TitledPane).() -> Unit = {}): TitledPane {

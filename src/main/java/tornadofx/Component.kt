@@ -50,6 +50,7 @@ import javax.json.Json
 import javax.json.JsonObject
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.*
+import org.controlsfx.control.HiddenSidesPane
 
 @Deprecated("Injectable was a misnomer", ReplaceWith("ScopedInstance"))
 interface Injectable : ScopedInstance
@@ -809,6 +810,17 @@ abstract class UIComponent(viewTitle: String? = "", icon: Node? = null) : Compon
     inline fun <reified C : UIComponent> BorderPane.center() = center(C::class)
     fun <C : UIComponent> BorderPane.center(nodeType: KClass<C>) = setRegion(scope, BorderPane::centerProperty, nodeType)
 
+    inline fun <reified C : UIComponent> HiddenSidesPane.top() = top(C::class)
+    fun <C : UIComponent> HiddenSidesPane.top(nodeType: KClass<C>) = setRegion(scope, HiddenSidesPane::topProperty, nodeType)
+    inline fun <reified C : UIComponent> HiddenSidesPane.right() = right(C::class)
+    fun <C : UIComponent> HiddenSidesPane.right(nodeType: KClass<C>) = setRegion(scope, HiddenSidesPane::rightProperty, nodeType)
+    inline fun <reified C : UIComponent> HiddenSidesPane.bottom() = bottom(C::class)
+    fun <C : UIComponent> HiddenSidesPane.bottom(nodeType: KClass<C>) = setRegion(scope, HiddenSidesPane::bottomProperty, nodeType)
+    inline fun <reified C : UIComponent> HiddenSidesPane.left() = left(C::class)
+    fun <C : UIComponent> HiddenSidesPane.left(nodeType: KClass<C>) = setRegion(scope, HiddenSidesPane::leftProperty, nodeType)
+    inline fun <reified C : UIComponent> HiddenSidesPane.center() = center(C::class)
+    fun <C : UIComponent> HiddenSidesPane.center(nodeType: KClass<C>) = setRegion(scope, HiddenSidesPane::contentProperty, nodeType)
+
     fun <S, T> TableColumn<S, T>.cellFormat(formatter: TableCell<S, T>.(T) -> Unit) = cellFormat(scope, formatter)
 
     fun <S, T, F : TableCellFragment<S, T>> TableColumn<S, T>.cellFragment(fragment: KClass<F>) = cellFragment(scope, fragment)
@@ -1372,5 +1384,28 @@ fun BorderPane.placeChild(child: Node, container: BorderPaneContainer) {
         BorderPaneContainer.BOTTOM -> bottom = child
         BorderPaneContainer.LEFT -> left = child
         BorderPaneContainer.CENTER -> center = child
+    }
+}
+
+enum class HiddenSidesPaneContainer {
+    TOP, RIGHT, BOTTOM, LEFT, CONTENT;
+}
+
+fun HiddenSidesPane.getContainerForChild(child: Node): HiddenSidesPaneContainer? {
+    if (top == child) return HiddenSidesPaneContainer.TOP
+    if (right == child) return HiddenSidesPaneContainer.RIGHT
+    if (bottom == child) return HiddenSidesPaneContainer.BOTTOM
+    if (left == child) return HiddenSidesPaneContainer.LEFT
+    if (content == child) return HiddenSidesPaneContainer.CONTENT
+    return null
+}
+
+fun HiddenSidesPane.placeChild(child: Node, container: HiddenSidesPaneContainer) {
+    when (container) {
+        HiddenSidesPaneContainer.TOP -> top = child
+        HiddenSidesPaneContainer.RIGHT -> right = child
+        HiddenSidesPaneContainer.BOTTOM -> bottom = child
+        HiddenSidesPaneContainer.LEFT -> left = child
+        HiddenSidesPaneContainer.CONTENT -> content = child
     }
 }

@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "no.tornado"
-version = "2.3.1"
+version = "2.3.1-hiddensidespane"
 description = "JavaFX Framework for Kotlin"
 
 repositories {
@@ -40,6 +40,7 @@ dependencies {
     api "org.apache.httpcomponents:httpclient:${httpclient_version}"
     api "de.jensd:fontawesomefx-fontawesome:${fontawesomefx_version}"
     implementation"org.apache.felix:org.apache.felix.framework:${felix_framework_version}"
+    implementation "org.controlsfx:controlsfx:11.0.1"
 }
 
 javafx {

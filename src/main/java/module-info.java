@@ -18,6 +18,7 @@ module tornadofx {
     requires transitive java.json;
     requires transitive java.prefs;
     requires transitive java.logging;
+    requires org.controlsfx.controls;
 
     opens tornadofx to javafx.fxml;
 
