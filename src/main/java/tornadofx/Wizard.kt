@@ -78,7 +78,7 @@ abstract class Wizard @JvmOverloads constructor(title: String? = null, heading: 
     }
 
     fun cancel() {
-        closeWizard()
+        close()
     }
 
     fun next() {
@@ -182,7 +182,7 @@ abstract class Wizard @JvmOverloads constructor(title: String? = null, heading: 
                         currentPage.onSave()
                         if (currentPage.isComplete) {
                             onSave()
-                            if (isComplete) closeWizard()
+                            if (isComplete) close()
                         }
                     }
                 }
@@ -207,10 +207,6 @@ abstract class Wizard @JvmOverloads constructor(title: String? = null, heading: 
     override fun onSave() {
         super.onSave()
         isComplete = true
-    }
-
-    protected fun closeWizard() {
-        close()
     }
 
     init {
@@ -241,7 +237,7 @@ abstract class Wizard @JvmOverloads constructor(title: String? = null, heading: 
                 if (allPagesComplete.value) {
                     currentPage.onSave()
                     onSave()
-                    closeWizard()
+                    close()
                 } else if (currentPageComplete.value && canGoNext.value) {
                     next()
                 }
