@@ -209,7 +209,7 @@ abstract class Wizard @JvmOverloads constructor(title: String? = null, heading: 
         isComplete = true
     }
 
-    open protected fun closeWizard() {
+    protected fun closeWizard() {
         close()
     }
 
