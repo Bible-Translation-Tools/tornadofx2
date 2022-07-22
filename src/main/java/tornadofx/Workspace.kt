@@ -163,7 +163,7 @@ open class Workspace(title: String = "Workspace", navigationMode: NavigationMode
                                 navigateBack()
                             }
                         }
-                        disableProperty().bind(booleanBinding(viewPos, viewStack) { value < 1 })
+                        disableProperty().bind(booleanBinding(viewPos, viewStack) { viewPos.value < 1 })
                     }
                     button {
                         addClass("icon-only")
@@ -174,7 +174,7 @@ open class Workspace(title: String = "Workspace", navigationMode: NavigationMode
                                 navigateForward()
                             }
                         }
-                        disableProperty().bind(booleanBinding(viewPos, viewStack) { value == viewStack.size - 1 })
+                        disableProperty().bind(booleanBinding(viewPos, viewStack) { viewPos.value == viewStack.size - 1 })
                     }
                     button {
                         addClass("icon-only")
@@ -312,7 +312,7 @@ open class Workspace(title: String = "Workspace", navigationMode: NavigationMode
             dockedComponent?.also {
                 dockedComponentProperty.value = null
                 if (oldMode == Stack && newMode == Tabs) {
-                    val listener = it.properties["tornadofx.rootParentChangeListener"] as ChangeListener<Parent>
+                    val listener = it.rootParentChangeListener
                     it.root.parentProperty().removeListener(listener)
                     it.callOnUndock()
                     dock(it, true)

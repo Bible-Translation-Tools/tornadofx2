@@ -463,10 +463,10 @@ abstract class UIComponent(viewTitle: String? = "", icon: Node? = null) : Compon
 
     // If the UIComponent property is set, prefer this to the property. This makes it possible to do subdelegation
     // using forwardWorkspaceActions inside other components like TabPane(https://github.com/edvin/tornadofx/issues/894)
-    internal val effectiveSavable: BooleanExpression get() = booleanBinding(savable, properties) { (properties["tornadofx.savable"] as? BooleanExpression)?.value ?: this.value }
-    internal val effectiveRefreshable: BooleanExpression get() = booleanBinding(refreshable, properties) { (properties["tornadofx.refreshable"] as? BooleanExpression)?.value ?: this.value }
-    internal val effectiveCreatable: BooleanExpression get() = booleanBinding(creatable, properties) { (properties["tornadofx.creatable"] as? BooleanExpression)?.value ?: this.value }
-    internal val effectiveDeletable: BooleanExpression get() = booleanBinding(deletable, properties) { (properties["tornadofx.deletable"] as? BooleanExpression)?.value ?: this.value }
+    internal val effectiveSavable: BooleanExpression get() = booleanBinding(savable, properties) { (properties["tornadofx.savable"] as? BooleanExpression)?.value ?: savable.value }
+    internal val effectiveRefreshable: BooleanExpression get() = booleanBinding(refreshable, properties) { (properties["tornadofx.refreshable"] as? BooleanExpression)?.value ?: refreshable.value }
+    internal val effectiveCreatable: BooleanExpression get() = booleanBinding(creatable, properties) { (properties["tornadofx.creatable"] as? BooleanExpression)?.value ?: creatable.value }
+    internal val effectiveDeletable: BooleanExpression get() = booleanBinding(deletable, properties) { (properties["tornadofx.deletable"] as? BooleanExpression)?.value ?: deletable.value }
 
     /**
      * Forward the Workspace button states and actions to the TabPane, which
@@ -542,61 +542,53 @@ abstract class UIComponent(viewTitle: String? = "", icon: Node? = null) : Compon
         properties["tornadofx.closeable"] = SimpleBooleanProperty(false)
     }
 
-    private val rootParentChangeListener: ChangeListener<Parent>
-        get() {
-            val key = "tornadofx.rootParentChangeListener"
-            if (properties[key] == null) {
-                properties[key] = ChangeListener<Parent> { _, oldParent, newParent ->
-                    if (modalStage != null) return@ChangeListener
-                    if (newParent == null && oldParent != null && isDocked) callOnUndock()
-                    if (newParent != null && newParent != oldParent && !isDocked) {
-                        callOnDock()
-                        // Call `onTabSelected` if/when we are connected to a Tab and it's selected
-                        // Note that this only works for builder constructed tabpanes
-                        owningTab?.let {
-                            it.selectedProperty()?.onChange { if (it) onTabSelected() }
-                            if (it.isSelected) onTabSelected()
-                        }
-                    }
+    internal val rootParentChangeListener: ChangeListener<Parent> by lazy {
+        ChangeListener<Parent> { _, oldParent, newParent ->
+            if (modalStage != null) return@ChangeListener
+            if (newParent == null && oldParent != null && isDocked) callOnUndock()
+            if (newParent != null && newParent != oldParent && !isDocked) {
+                callOnDock()
+                // Call `onTabSelected` if/when we are connected to a Tab and it's selected
+                // Note that this only works for builder constructed tabpanes
+                owningTab?.let {
+                    it.selectedProperty()?.onChange { if (it) onTabSelected() }
+                    if (it.isSelected) onTabSelected()
                 }
             }
-            return properties[key] as ChangeListener<Parent>
         }
+    }
 
-    private val rootSceneChangeListener: ChangeListener<Scene>
-        get() {
-            val key = "tornadofx.rootSceneChangeListener"
-            if (properties[key] == null) {
-                properties[key] = ChangeListener<Scene> { _, oldParent, newParent ->
-                    if (modalStage != null || root.parent != null) return@ChangeListener
-                    if (newParent == null && oldParent != null && isDocked) callOnUndock()
-                    if (newParent != null && newParent != oldParent && !isDocked) {
-                        // Calls dock or undock when window opens or closes
-                        newParent.windowProperty().onChangeOnce {
-                            it?.showingProperty()?.addListener(rootSceneWindowShowingPropertyChangeListener)
-                        }
-                        callOnDock()
-                    }
-                }
-            }
-            return properties[key] as ChangeListener<Scene>
-        }
+    private val rootSceneChangeListener: ChangeListener<Scene> by lazy {
+        ChangeListener<Scene> { _, oldParent, newParent ->
+            val key = "tornadofx.rootSceneWindowPropertyChangeListener"
 
-    private val rootSceneWindowShowingPropertyChangeListener: ChangeListener<Boolean>
-        get() {
-            val key = "tornadofx.rootSceneWindowShowingPropertyChangeListener"
-            if (properties[key] == null) {
-                properties[key] = ChangeListener<Boolean> { property, oldValue, newValue ->
-                    if (!isInitialized) {
-                        property.removeListener(rootSceneWindowShowingPropertyChangeListener)
-                        return@ChangeListener
-                    }
-                    if (!newValue && isDocked) callOnUndock()
-                    if (newValue && !isDocked) callOnDock()
+            if (modalStage != null || root.parent != null) return@ChangeListener
+            if (newParent == null && oldParent != null && isDocked) {
+                (properties[key] as? ChangeListener<Window>)?.run {
+                    oldParent.windowProperty().removeListener(this)
                 }
+                callOnUndock()
             }
-            return properties[key] as ChangeListener<Boolean>
+            if (newParent != null && newParent != oldParent && !isDocked) {
+                // Calls dock or undock when window opens or closes
+                properties[key] = newParent.windowProperty().onChangeOnce {
+                    it?.showingProperty()?.addListener(rootSceneWindowShowingPropertyChangeListener)
+                }
+                callOnDock()
+            }
         }
+    }
+
+    private val rootSceneWindowShowingPropertyChangeListener: ChangeListener<Boolean> by lazy {
+        ChangeListener<Boolean> { property, oldValue, newValue ->
+            if (!isInitialized) {
+                property.removeListener(rootSceneWindowShowingPropertyChangeListener)
+                return@ChangeListener
+            }
+            if (!newValue && isDocked) callOnUndock()
+            if (newValue && !isDocked) callOnDock()
+        }
+    }
 
     internal fun init() {
         if (isInitialized) return
@@ -1076,6 +1068,9 @@ abstract class UIComponent(viewTitle: String? = "", icon: Node? = null) : Compon
                 setOnHidden {
                     modalStage = null
                     callOnUndock()
+                    /* reset scene so that next time time openModal is called the owner parameter
+                    does not return this modal stage */
+                    scene.root = Pane()
                 }
 
                 if (block) showAndWait() else show()
