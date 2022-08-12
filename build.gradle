@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "no.tornado"
-version = "2.1.0-WA-fork"
+version = "2.1.1-WA-fork"
 description = "JavaFX Framework for Kotlin"
 
 repositories {
