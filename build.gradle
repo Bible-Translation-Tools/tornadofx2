@@ -37,9 +37,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}"
 
     api "org.glassfish:javax.json:${json_version}"
-    api "org.apache.httpcomponents:httpclient:${httpclient_version}"
-    api "de.jensd:fontawesomefx-fontawesome:${fontawesomefx_version}"
-    implementation"org.apache.felix:org.apache.felix.framework:${felix_framework_version}"
 }
 
 javafx {

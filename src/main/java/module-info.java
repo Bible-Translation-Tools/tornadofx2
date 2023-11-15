@@ -1,7 +1,4 @@
-import tornadofx.ChildInterceptor;
-import tornadofx.Stylesheet;
-
-module tornadofx {
+module tornadofxbuilders {
     requires transitive javafx.controls;
     requires javafx.fxml;
     requires javafx.swing;
@@ -11,18 +8,11 @@ module tornadofx {
     requires kotlin.stdlib;
     requires kotlin.reflect;
 
-    requires static httpcore;
-    requires static httpclient;
-    requires static org.apache.felix.framework;
-
     requires transitive java.json;
     requires transitive java.prefs;
     requires transitive java.logging;
 
-    opens tornadofx to javafx.fxml;
+    opens tornadofxbuilders to javafx.fxml;
 
-    exports tornadofx;
-
-    uses ChildInterceptor;
-    uses Stylesheet;
+    exports tornadofxbuilders;
 }
